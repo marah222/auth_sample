@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 
-// A utility class to hold all the colors for the app.
-// This prevents hard-coding color values in the UI and ensures consistency.
 class AppColors {
-  // This class is not meant to be instantiated.
   AppColors._();
 
   // --- Primary Palette ---
