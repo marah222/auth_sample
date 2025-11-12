@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
 import 'core/design_system/app_theme.dart';
+import 'core/di/service_locator.dart';
 
 void main() {
+  setupDependencies();
   runApp(const MyApp());
 }
 
