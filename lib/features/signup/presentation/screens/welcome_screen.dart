@@ -1,4 +1,5 @@
 import 'package:auth_sample/core/design_system/widgets/auth_header.dart';
+import 'package:auth_sample/features/signup/presentation/screens/first_step_register_screen.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_strings.dart';
@@ -40,10 +41,9 @@ class WelcomeScreen extends StatelessWidget {
               const SizedBox(height: AppSpacing.xl),
               AppButton.email(
                 onPressed: () {
-                  // context.read<SignUpBloc>().add(const ProceedToStep(1));
-                  // Navigator.of(context).pushNamed(
-                  //     EnterPasswordScreen.routeName);
-                },
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const FirstStepRegisterScreen()),
+                  ); },
               ),
               const Spacer(),
               Center(child: LanguageSelector()),

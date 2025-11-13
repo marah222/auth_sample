@@ -37,10 +37,11 @@ class AppButton extends StatelessWidget {
       AppButtonType.disabled => AppColors.disabled,
     };
     final foregroundColor = switch (type) {
-      AppButtonType.primary => Colors.white,
+      AppButtonType.primary => AppColors.backgroundWhite,
       AppButtonType.secondary => AppColors.primaryDarkText,
-      AppButtonType.disabled => AppColors.secondaryText,
+      AppButtonType.disabled => AppColors.backgroundWhite,
     };
+
     return Semantics(
       button: true,
       enabled: !_isDisabled,
@@ -88,38 +89,31 @@ class AppButton extends StatelessWidget {
         ),
       ),
     );
+  }
 
-    return Semantics(
-      button: true,
-      enabled: !_isDisabled,
-      label: semanticLabel ?? label,
-      child: ElevatedButton(
-        onPressed: _isDisabled ? null : onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: backgroundColor,
-          foregroundColor: foregroundColor,
-          minimumSize: const Size.fromHeight(AppSpacing.buttonHeight),
-          side: BorderSide.none,
-          elevation: 0,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (leading != null) ...[
-              leading!,
-              const SizedBox(width: AppSpacing.sm),
-            ],
-            Text(
-              label,
-              style: AppTypography.textTheme.labelLarge?.copyWith(
-                color: foregroundColor,
-              ),
-            ),
-            if (tailing != null) ...[SvgPicture.asset(AppIcons.enterIcon)],
-          ],
-        ),
-      ),
+  factory AppButton.email({Key? key, required VoidCallback? onPressed}) {
+    return AppButton(
+      key: key,
+      label: AppStrings.continueWithEmail,
+      onPressed: onPressed,
+      tailing: true,
+      semanticLabel: AppStrings.emailButtonAriaLabel,
+    );
+  }
+
+  factory AppButton.proceed({
+    Key? key,
+    required VoidCallback? onPressed,
+    bool isFormValid = false,
+    required String title
+  }) {
+    return AppButton(
+      key: key,
+      label: title,
+      onPressed: onPressed,
+      type: isFormValid ? AppButtonType.primary : AppButtonType.disabled,
+      tailing: true,
+      semanticLabel: AppStrings.emailButtonAriaLabel,
     );
   }
 
@@ -131,16 +125,6 @@ class AppButton extends StatelessWidget {
       type: AppButtonType.secondary,
       leading: SvgPicture.asset(AppIcons.google),
       semanticLabel: AppStrings.googleButtonAriaLabel,
-    );
-  }
-
-  factory AppButton.email({Key? key, required VoidCallback? onPressed}) {
-    return AppButton(
-      key: key,
-      label: AppStrings.continueWithEmail,
-      onPressed: onPressed,
-      tailing: true,
-      semanticLabel: AppStrings.emailButtonAriaLabel,
     );
   }
 }
