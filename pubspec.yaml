@@ -24,6 +24,8 @@ dependencies:
   # Fonts
   google_fonts: ^6.1.0
   flutter_svg: ^2.2.2
+  bloc_concurrency: ^0.2.5
+  stream_transform: ^2.1.1
 
 dev_dependencies:
   flutter_test:

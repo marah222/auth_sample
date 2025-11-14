@@ -54,6 +54,8 @@ class AppStrings {
   static const forgotPassword = 'Forgot password?';
   static const googleButtonAriaLabel = 'Continue with Google button';
   static const emailButtonAriaLabel = 'Continue with Email button';
+  static const String thankYouForChoosingWorkiom =
+      'Thank you for choosing\nWorkiom';
   static const backButtonTooltip = 'Back';
   static const languageEnglish = 'English';
   static const languageTurkish = 'Türkçe';
