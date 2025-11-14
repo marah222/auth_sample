@@ -1,12 +1,19 @@
 import 'package:auth_sample/features/signup/presentation/bloc/signup_event.dart';
 import 'package:auth_sample/features/signup/presentation/bloc/signup_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:bloc_concurrency/bloc_concurrency.dart';
+import 'package:stream_transform/stream_transform.dart';
 
 import '../../../../core/design_system/widgets/password_strength.dart';
 import '../../domain/usecases/get_password_complexity.dart';
 import '../../domain/usecases/is_tenant_available.dart';
 import '../../domain/usecases/register_tenant.dart';
 
+EventTransformer<E> debounceRestartable<E>(Duration duration) {
+  return (events, mapper) {
+    return restartable<E>().call(events.debounce(duration), mapper);
+  };
+}
 class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
   final GetPasswordComplexityUseCase getPasswordComplexityUseCase;
   final IsTenantAvailableUseCase isTenantAvailableUseCase;
@@ -21,6 +28,15 @@ class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
     on<PasswordScreenLoaded>(_onPasswordScreenLoaded);
     on<EmailChanged>(_onEmailChanged);
     on<PasswordChanged>(_onPasswordChanged);
+    on<ProceedToCompanyDetails>(_onProceedToCompanyDetails);
+    on<TenantNameChanged>(
+      _onTenantNameChanged,
+      transformer: debounceRestartable(const Duration(milliseconds: 500)),
+    );
+    on<FirstNameChanged>(_onFirstNameChanged);
+    on<LastNameChanged>(_onLastNameChanged);
+    on<CreateWorkspacePressed>(_onCreateWorkspacePressed);
+
   }
 
   void _onContinueWithEmailPressed(ContinueWithEmailPressed event,
@@ -79,6 +95,7 @@ class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
 
     emit(currentState.copyWith(
       password: password,
+      isPasswordValid: isPasswordValid,
       hasMinLength: hasMinLength,
       hasUppercase: hasUppercase,
       hasLowercase: hasLowercase,
@@ -86,5 +103,76 @@ class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
       hasNonAlphanumeric: hasNonAlphanumeric,
       strength: strength,
     ));
+  }
+  void _onProceedToCompanyDetails(ProceedToCompanyDetails event, Emitter<SignUpState> emit) {
+    final currentState = state as PasswordEntryState;
+    emit(CompanyEntryState(
+      email: currentState.email,
+      password: currentState.password,
+    ));
+  }
+
+  Future<void> _onTenantNameChanged(
+      TenantNameChanged event,
+      Emitter<SignUpState> emit,
+      ) async {
+    final currentState = state as CompanyEntryState;
+    final name = event.name;
+
+    if (name.length < 3) {
+      emit(currentState.copyWith(
+          tenantName: name, tenantStatus: TenantAvailabilityStatus.invalid));
+      return;
+    }
+
+    emit(currentState.copyWith(
+        tenantName: name, tenantStatus: TenantAvailabilityStatus.checking));
+
+    try {
+      final isAvailable = await isTenantAvailableUseCase(tenantName: name);
+      if ((state as CompanyEntryState).tenantName == name) {
+        emit(currentState.copyWith(
+          tenantStatus: isAvailable
+              ? TenantAvailabilityStatus.available
+              : TenantAvailabilityStatus.unavailable,
+        ));
+      }
+    } catch (e) {
+      emit(SignUpError(e.toString()));
+    }
+  }
+
+  void _onFirstNameChanged(FirstNameChanged event, Emitter<SignUpState> emit) {
+    final currentState = state as CompanyEntryState;
+    emit(currentState.copyWith(
+        firstName: event.name, isFirstNameValid: event.name.isNotEmpty));
+  }
+
+  void _onLastNameChanged(LastNameChanged event, Emitter<SignUpState> emit) {
+    final currentState = state as CompanyEntryState;
+    emit(currentState.copyWith(
+        lastName: event.name, isLastNameValid: event.name.isNotEmpty));
+  }
+
+
+  Future<void> _onCreateWorkspacePressed(CreateWorkspacePressed event, Emitter<SignUpState> emit) async {
+    if (state is! CompanyEntryState) return;
+    final currentState = state as CompanyEntryState;
+    if (!currentState.isFormValid) return;
+
+    emit(currentState.copyWith(isSubmitting: true));
+
+    try {
+      await registerTenantUseCase(
+        tenantName: currentState.tenantName,
+        email: currentState.email,
+        password: currentState.password,
+        firstName: currentState.firstName,
+        lastName: currentState.lastName,
+      );
+      emit(RegistrationSuccess());
+    } catch (e) {
+      emit(SignUpError(e.toString()));
+    }
   }
 }
