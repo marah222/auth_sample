@@ -2,6 +2,7 @@ import 'package:auth_sample/features/signup/presentation/bloc/signup_event.dart'
 import 'package:auth_sample/features/signup/presentation/bloc/signup_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/design_system/widgets/password_strength.dart';
 import '../../domain/usecases/get_password_complexity.dart';
 import '../../domain/usecases/is_tenant_available.dart';
 import '../../domain/usecases/register_tenant.dart';
@@ -22,18 +23,14 @@ class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
     on<PasswordChanged>(_onPasswordChanged);
   }
 
-  void _onContinueWithEmailPressed(
-    ContinueWithEmailPressed event,
-    Emitter<SignUpState> emit,
-  ) {
+  void _onContinueWithEmailPressed(ContinueWithEmailPressed event,
+      Emitter<SignUpState> emit,) {
     emit(NavigateToPasswordScreen());
   }
 
-  Future<void> _onPasswordScreenLoaded(
-    PasswordScreenLoaded event,
-    Emitter<SignUpState> emit,
-  ) async {
-    // Emit loading state
+  Future<void> _onPasswordScreenLoaded(PasswordScreenLoaded event,
+      Emitter<SignUpState> emit,) async {
+
     emit(const PasswordEntryState(isLoading: true));
     try {
       final complexity = await getPasswordComplexityUseCase();
@@ -59,28 +56,35 @@ class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
     final password = event.password;
 
     final hasMinLength = password.length >= complexity.requiredLength;
-    final hasUppercase =
-        !complexity.requireUppercase || password.contains(RegExp(r'[A-Z]'));
-    final hasLowercase =
-        !complexity.requireLowercase || password.contains(RegExp(r'[a-z]'));
-    final hasDigit =
-        !complexity.requireDigit || password.contains(RegExp(r'[0-9]'));
-    final hasNonAlphanumeric =
-        !complexity.requireNonAlphanumeric ||
+    final hasUppercase = !complexity.requireUppercase ||
+        password.contains(RegExp(r'[A-Z]'));
+    final hasLowercase = !complexity.requireLowercase ||
+        password.contains(RegExp(r'[a-z]'));
+    final hasDigit = !complexity.requireDigit ||
+        password.contains(RegExp(r'[0-9]'));
+    final hasNonAlphanumeric = !complexity.requireNonAlphanumeric ||
         password.contains(RegExp(r'[^A-Za-z0-9]'));
 
-    final isPasswordValid =
-        hasMinLength &&
-        hasUppercase &&
-        hasLowercase &&
-        hasDigit &&
-        hasNonAlphanumeric;
+    final isPasswordValid = hasMinLength && hasUppercase && hasLowercase &&
+        hasDigit && hasNonAlphanumeric;
 
-    emit(
-      currentState.copyWith(
-        password: password,
-        isPasswordValid: isPasswordValid,
-      ),
-    );
+    PasswordStrength strength;
+    if (password.isEmpty) {
+      strength = PasswordStrength.initial;
+    } else if (isPasswordValid) {
+      strength = PasswordStrength.strong;
+    } else {
+      strength = PasswordStrength.noStrong;
+    }
+
+    emit(currentState.copyWith(
+      password: password,
+      hasMinLength: hasMinLength,
+      hasUppercase: hasUppercase,
+      hasLowercase: hasLowercase,
+      hasDigit: hasDigit,
+      hasNonAlphanumeric: hasNonAlphanumeric,
+      strength: strength,
+    ));
   }
 }
