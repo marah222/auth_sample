@@ -28,3 +28,28 @@ class PasswordChanged extends SignUpEvent {
   @override
   List<Object> get props => [password];
 }
+
+class ProceedToCompanyDetails extends SignUpEvent {}
+
+class TenantNameChanged extends SignUpEvent {
+  final String name;
+  const TenantNameChanged(this.name);
+  @override
+  List<Object> get props => [name];
+}
+
+class FirstNameChanged extends SignUpEvent {
+  final String name;
+  const FirstNameChanged(this.name);
+  @override
+  List<Object> get props => [name];
+}
+
+class LastNameChanged extends SignUpEvent {
+  final String name;
+  const LastNameChanged(this.name);
+  @override
+  List<Object> get props => [name];
+}
+
+class CreateWorkspacePressed extends SignUpEvent {}

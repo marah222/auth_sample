@@ -14,6 +14,7 @@ import '../../../../core/di/service_locator.dart';
 import '../bloc/signup_bloc.dart';
 import '../bloc/signup_event.dart';
 import '../bloc/signup_state.dart';
+import 'company_screen.dart';
 
 class FirstStepRegisterScreen extends StatelessWidget {
   const FirstStepRegisterScreen({super.key});
@@ -27,7 +28,7 @@ class FirstStepRegisterScreen extends StatelessWidget {
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.lg),
-            child: BlocBuilder<SignUpBloc, SignUpState>(
+            child: BlocConsumer<SignUpBloc, SignUpState>(
               builder: (context, state) {
                 if (state is PasswordEntryState && state.isLoading) {
                   return const Center(child: CircularProgressIndicator());
@@ -39,6 +40,18 @@ class FirstStepRegisterScreen extends StatelessWidget {
                   return Center(child: Text('Error: ${state.message}'));
                 }
                 return const Center(child: Text('Something went wrong.'));
+              },
+              listener: (context, state) {
+                if (state is CompanyEntryState) {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => BlocProvider.value(
+                        value: context.read<SignUpBloc>(),
+                        child: const CompanyScreen(),
+                      ),
+                    ),
+                  );
+                }
               },
             ),
           ),
@@ -87,10 +100,11 @@ class FirstStepRegisterScreen extends StatelessWidget {
           isFormValid: state.isFormValid,
           onPressed: state.isFormValid
               ? () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Form is valid! Navigate...')),
-            );
-          }
+                  context.read<SignUpBloc>().add(ProceedToCompanyDetails());
+                  // ScaffoldMessenger.of(context).showSnackBar(
+                  //   const SnackBar(content: Text('Form is valid! Navigate...')),
+                  // );
+                }
               : null,
         ),
         const SizedBox(height: 100),

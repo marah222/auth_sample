@@ -107,3 +107,73 @@ class PasswordEntryState extends SignUpState {
     strength,
   ];
 }
+
+class NavigateToCompanyScreen extends SignUpState {}
+
+enum TenantAvailabilityStatus { initial, checking, available, unavailable, invalid }
+
+class CompanyEntryState extends SignUpState {
+  final String email;
+  final String password;
+  final String tenantName;
+  final String firstName;
+  final String lastName;
+  final TenantAvailabilityStatus tenantStatus;
+  final bool isFirstNameValid;
+  final bool isLastNameValid;
+  final bool isSubmitting;
+
+  const CompanyEntryState({
+    required this.email,
+    required this.password,
+    this.tenantName = '',
+    this.firstName = '',
+    this.lastName = '',
+    this.tenantStatus = TenantAvailabilityStatus.initial,
+    this.isFirstNameValid = false,
+    this.isLastNameValid = false,
+    this.isSubmitting = false,
+  });
+
+  bool get isFormValid =>
+      tenantStatus == TenantAvailabilityStatus.available &&
+          isFirstNameValid &&
+          isLastNameValid &&
+          !isSubmitting;
+
+  CompanyEntryState copyWith({
+    String? tenantName,
+    String? firstName,
+    String? lastName,
+    TenantAvailabilityStatus? tenantStatus,
+    bool? isFirstNameValid,
+    bool? isLastNameValid,
+    bool? isSubmitting,
+  }) {
+    return CompanyEntryState(
+      email: this.email,
+      password: this.password,
+      tenantName: tenantName ?? this.tenantName,
+      firstName: firstName ?? this.firstName,
+      lastName: lastName ?? this.lastName,
+      tenantStatus: tenantStatus ?? this.tenantStatus,
+      isFirstNameValid: isFirstNameValid ?? this.isFirstNameValid,
+      isLastNameValid: isLastNameValid ?? this.isLastNameValid,
+      isSubmitting: isSubmitting ?? this.isSubmitting,
+    );
+  }
+
+  @override
+  List<Object> get props => [
+    email,
+    password,
+    tenantName,
+    firstName,
+    lastName,
+    tenantStatus,
+    isFirstNameValid,
+    isLastNameValid,
+    isSubmitting,
+  ];
+}
+class RegistrationSuccess extends SignUpState {}

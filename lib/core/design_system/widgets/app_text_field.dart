@@ -6,6 +6,7 @@ import '../app_spacing.dart';
 
 class AppTextField extends StatefulWidget {
   final TextEditingController? controller;
+  final String? initialValue;
   final String labelText;
   final String hintText;
   final dynamic prefixIcon;
@@ -17,6 +18,7 @@ class AppTextField extends StatefulWidget {
   const AppTextField({
     super.key,
     this.controller,
+    this.initialValue,
     required this.labelText,
     required this.hintText,
     this.prefixIcon,
@@ -37,8 +39,19 @@ class _AppTextFieldState extends State<AppTextField> {
   @override
   void initState() {
     super.initState();
-    _controller = widget.controller ?? TextEditingController();
+    _controller = widget.controller ?? TextEditingController(text: widget.initialValue);
     _obscureText = widget.isPassword;
+  }
+
+  @override
+  void didUpdateWidget(covariant AppTextField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.controller == null && oldWidget.controller != null) {
+      _controller = TextEditingController(text: widget.initialValue);
+    } else if (widget.initialValue != oldWidget.initialValue && _controller.text != widget.initialValue) {
+      _controller.text = widget.initialValue ?? '';
+      _controller.selection = TextSelection.fromPosition(TextPosition(offset: _controller.text.length));
+    }
   }
 
   @override
@@ -80,10 +93,8 @@ class _AppTextFieldState extends State<AppTextField> {
   }
 
   Widget? _buildSuffixIcon() {
-    // If a custom widget is passed, use it directly.
     if (widget.suffixIcon != null) return  widget.suffixIcon;
 
-    // If password field → toggle visibility icon.
     if (widget.isPassword) {
       return IconButton(
         icon: Icon(
