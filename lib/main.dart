@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'core/design_system/app_theme.dart';
 import 'core/di/service_locator.dart';
+import 'features/signup/presentation/screens/welcome_screen.dart';
 
 void main() {
   setupDependencies();
@@ -18,7 +19,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Sign-Up Flow',
       theme: AppTheme.lightTheme,
-      home: Scaffold(),
+      home: const WelcomeScreen(),
     );
   }
 }
