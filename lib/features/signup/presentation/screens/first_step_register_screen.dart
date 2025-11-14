@@ -9,6 +9,7 @@ import '../../../../core/design_system/widgets/app_bar.dart';
 import '../../../../core/design_system/widgets/app_button.dart';
 import '../../../../core/design_system/widgets/app_text_field.dart';
 import '../../../../core/design_system/widgets/footer_widget.dart';
+import '../../../../core/design_system/widgets/password_feedback.dart';
 import '../../../../core/di/service_locator.dart';
 import '../bloc/signup_bloc.dart';
 import '../bloc/signup_event.dart';
@@ -71,6 +72,15 @@ class FirstStepRegisterScreen extends StatelessWidget {
             context.read<SignUpBloc>().add(PasswordChanged(value));
           },
         ),
+        if (state.complexity != null)
+          PasswordFeedback(
+            complexity: state.complexity!,
+            password: state.password,
+            strength: state.strength,
+            hasMinLength: state.hasMinLength,
+            hasUppercase: state.hasUppercase,
+            hasLowercase: state.hasLowercase,
+          ),
         const Spacer(),
         AppButton.proceed(
           title: AppStrings.confirmPassword,
@@ -83,7 +93,7 @@ class FirstStepRegisterScreen extends StatelessWidget {
           }
               : null,
         ),
-        const SizedBox(height: 136),
+        const SizedBox(height: 100),
         const FooterWidget(),
       ],
     );
